@@ -47,10 +47,13 @@ class Perceptron(LinearModel):
         """        
         y_hat = self.predict(x_i)
         # TODO nao atualiza!!!
-        if y_hat!= 0:
-            print("self w",self.W, "y_i", y_i, "y_hat", y_hat)
+        # if y_hat!= 0:
+        #     print("self w",self.W, "y_i", y_i, "y_hat", y_hat)
         if y_hat != y_i:
-            self.W += y_i * x_i
+            # self.W += y_i * x_i
+            # multi layer
+            self.W[y_i, :] += x_i
+            self.W[y_hat, :] -= x_i
 
 
 class LogisticRegression(LinearModel):
@@ -103,6 +106,7 @@ class MLP(object):
         """
         Dont forget to return the loss of the epoch.
         """
+
         raise NotImplementedError
 
 
