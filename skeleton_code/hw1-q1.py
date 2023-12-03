@@ -45,7 +45,7 @@ class Perceptron(LinearModel):
         y_i (scalar): the gold label for that example
         other arguments are ignored
         """        
-        self.W[y_i] += x_i
+        self.W[y_i] += y_i * x_i
 
 
 class LogisticRegression(LinearModel):
@@ -55,19 +55,16 @@ class LogisticRegression(LinearModel):
         y_i: the gold label for that example
         learning_rate (float): keep it at the default value for your plots
         """
-        print('x_i shape: {}'.format(x_i.shape))
-        print('W shape: {}'.format(self.W.shape))
-        print('y_i shape: {}'.format(y_i.shape))
+
         # Q1.1b
-        x_i = x_i.reshape(-1, 1)
-        print('x_i shape: {}'.format(x_i.shape))       
-        probs = 1 / (1 + np.exp(-x_i.dot(self.W)))
-
-        # Compute gradient of loss function; vector of size p+1.
-        gradient = x_i.T.dot(probs - y_i)
-
-        # Gradient descent update of weights
-        self.W -= learning_rate * gradient
+        # Compute probability y_hat
+        y_hat = 1 / (1 + np.exp(-self.W.dot(x_i)))
+        
+        # Compute gradient
+        gradient = (y_i - y_hat[y_i]) * (x_i)
+        
+        # Update weights:
+        self.W += + learning_rate * gradient
 
         
         
