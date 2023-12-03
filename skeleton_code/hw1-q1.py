@@ -45,7 +45,12 @@ class Perceptron(LinearModel):
         y_i (scalar): the gold label for that example
         other arguments are ignored
         """        
-        self.W[y_i] += y_i * x_i
+        y_hat = self.predict(x_i)
+        # TODO nao atualiza!!!
+        if y_hat!= 0:
+            print("self w",self.W, "y_i", y_i, "y_hat", y_hat)
+        if y_hat != y_i:
+            self.W += y_i * x_i
 
 
 class LogisticRegression(LinearModel):
