@@ -47,11 +47,11 @@ class Perceptron(LinearModel):
         """        
         y_hat = self.predict(x_i)
         # TODO nao atualiza!!!
-        # if y_hat!= 0:
-        #     print("self w",self.W, "y_i", y_i, "y_hat", y_hat)
+        ## if y_hat!= 0:
+        # #   print("self w",self.W, "y_i", y_i, "y_hat", y_hat)
         if y_hat != y_i:
             # self.W += y_i * x_i
-            # multi layer
+            # multi class
             self.W[y_i, :] += x_i
             self.W[y_hat, :] -= x_i
 
@@ -63,17 +63,21 @@ class LogisticRegression(LinearModel):
         y_i: the gold label for that example
         learning_rate (float): keep it at the default value for your plots
         """
-
         # Q1.1b
-        # Compute probability y_hat
-        y_hat = 1 / (1 + np.exp(-self.W.dot(x_i)))
         
-        # Compute gradient
-        gradient = (y_i - y_hat[y_i]) * (x_i)
-        
-        # Update weights:
-        self.W += + learning_rate * gradient
+        # Get probability scores according to the model (num_labels x 1).
+        label_scores = np.expand_dims(self.W.dot(x_i), axis = 1)
 
+        # One-hot encode true label (num_labels x 1).
+        y_one_hot = np.zeros((np.size(self.W, 0),1))
+        y_one_hot[y_i] = 1
+
+        # Softmax function
+        # This gives the label probabilities according to the model (num_labels x 1).
+        label_probabilities = np.exp(label_scores) / np.sum(np.exp(label_scores))
+        
+        # SGD update. W is num_labels x num_features.
+        self.W = self.W + learning_rate * (y_one_hot - label_probabilities).dot(np.expand_dims(x_i, axis = 1).T)
         
         
         
@@ -83,13 +87,99 @@ class MLP(object):
     # in main().
     def __init__(self, n_classes, n_features, hidden_size):
         # Initialize an MLP with a single hidden layer.
-        raise NotImplementedError
+        # n_classes: number of output classes
+        # n_features: number of input features
+        # hidden_size: number of hidden units
+        
+        # Initialize weights with normal distribution
+        W1 = np.random.normal(loc=0.1, scale=0.1, size=(hidden_size, n_features))
+        W2 = np.random.normal(loc=0.1, scale=0.1, size=(n_classes, hidden_size))
+        
+        self.weights = [W1, W2]
 
+        # Initialize biases with zero vectors
+        b1 = np.zeros((hidden_size,))
+        b2 = np.zeros((n_classes,))
+        
+        self.biases = [b1, b2]
+        
+        self.hidden_size = hidden_size
+        self.n_classes = n_classes
+        self.n_features = n_features
+        
+        
+        
+    def backward(self, x, y, output, hiddens):
+        num_layers = len(self.weights)
+        g = np.tanh
+        z = output
+
+        probs = np.exp(output) / np.sum(np.exp(output))
+        grad_z = probs - y  
+        
+        grad_weights = []
+        grad_biases = []
+        
+        # Backpropagate gradient computations 
+        for i in range(num_layers-1, -1, -1):
+            
+            # Gradient of hidden parameters.
+            h = x if i == 0 else hiddens[i-1]
+            grad_weights.append(grad_z[:, None].dot(h[:, None].T))
+            grad_biases.append(grad_z)
+            
+            # Gradient of hidden layer below.
+            grad_h = self.weights[i].T.dot(grad_z)
+
+            # Gradient of hidden layer below before activation.
+            grad_z = grad_h * (1-h**2)   # Grad of loss wrt z3.
+
+        # Making gradient vectors have the correct order
+        grad_weights.reverse()
+        grad_biases.reverse()
+        return grad_weights, grad_biases
+        
+        
+        
+    def forward(self, x):
+        num_layers = len(self.weights)
+        g = np.tanh
+        hiddens = []
+        # compute hidden layers
+        for i in range(num_layers):
+                h = x if i == 0 else hiddens[i-1]
+                z = self.weights[i].dot(h) + self.biases[i]
+                if i < num_layers-1:  # Assuming the output layer has no activation.
+                    hiddens.append(g(z))
+        #compute output
+        output = z
+        
+        return output, hiddens
+
+
+
+    def compute_loss(self, output, y):
+        # compute loss
+        probs = np.exp(output) / np.sum(np.exp(output))
+        loss = -y.dot(np.log(probs))
+        
+        return loss  
+    
+    
+    
     def predict(self, X):
         # Compute the forward pass of the network. At prediction time, there is
         # no need to save the values of hidden nodes, whereas this is required
         # at training time.
-        raise NotImplementedError
+        # X (n_examples x n_features)
+        # return: (n_examples)
+        scores = np.dot(self.W1, X.T)  # (n_hidden x n_examples)
+        hidden = np.maximum(scores, 0)
+        scores = np.dot(self.W2, hidden)  # (n_classes x n_examples)
+        predicted_labels = scores.argmax(axis=0)
+        return predicted_labels
+    
+        
 
     def evaluate(self, X, y):
         """
@@ -102,12 +192,32 @@ class MLP(object):
         n_possible = y.shape[0]
         return n_correct / n_possible
 
+
     def train_epoch(self, X, y, learning_rate=0.001):
         """
         Dont forget to return the loss of the epoch.
         """
-
-        raise NotImplementedError
+        num_layers = 2
+        total_loss = 0
+        # For each observation and target
+        for x, y in zip(X, y):
+            # Comoute forward pass
+            output, hiddens = self.forward(x)
+            
+            # Compute Loss and Update total loss
+            loss = self.compute_loss(output, y)
+            total_loss+=loss
+            # Compute backpropagation
+            grad_weights, grad_biases = self.backward(x, y, output)
+            
+            # Update weights
+            
+            for i in range(num_layers):
+                self.weights[i] -= learning_rate*grad_weights[i]
+                self.biases[i] -= learning_rate*grad_biases[i]
+                
+        return total_loss
+                
 
 
 def plot(epochs, train_accs, val_accs):
@@ -117,6 +227,7 @@ def plot(epochs, train_accs, val_accs):
     plt.plot(epochs, val_accs, label='validation')
     plt.legend()
     plt.show()
+    plt.savefig('images/q1_2b.png')
 
 def plot_loss(epochs, loss):
     plt.xlabel('Epoch')
