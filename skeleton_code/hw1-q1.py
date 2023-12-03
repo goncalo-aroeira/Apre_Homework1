@@ -38,15 +38,14 @@ class LinearModel(object):
         return n_correct / n_possible
 
 
-class Perceptron(LinearModel):
+class Perceptron(LinearModel):    
     def update_weight(self, x_i, y_i, **kwargs):
         """
         x_i (n_features): a single training example
         y_i (scalar): the gold label for that example
         other arguments are ignored
-        """
-        # Q1.1a
-        raise NotImplementedError
+        """        
+        self.W[y_i] += x_i
 
 
 class LogisticRegression(LinearModel):
@@ -56,10 +55,23 @@ class LogisticRegression(LinearModel):
         y_i: the gold label for that example
         learning_rate (float): keep it at the default value for your plots
         """
+        print('x_i shape: {}'.format(x_i.shape))
+        print('W shape: {}'.format(self.W.shape))
+        print('y_i shape: {}'.format(y_i.shape))
         # Q1.1b
-        raise NotImplementedError
+        x_i = x_i.reshape(-1, 1)
+        print('x_i shape: {}'.format(x_i.shape))       
+        probs = 1 / (1 + np.exp(-x_i.dot(self.W)))
 
+        # Compute gradient of loss function; vector of size p+1.
+        gradient = x_i.T.dot(probs - y_i)
 
+        # Gradient descent update of weights
+        self.W -= learning_rate * gradient
+
+        
+        
+        
 class MLP(object):
     # Q3.2b. This MLP skeleton code allows the MLP to be used in place of the
     # linear models with no changes to the training loop or evaluation code
