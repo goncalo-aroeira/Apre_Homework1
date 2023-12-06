@@ -92,7 +92,6 @@ class MLP(object):
         # hidden_size: number of hidden units
         
         # Initialize weights with normal distribution
-        print("features", n_features, "\nclasses", n_classes, "\nhidden", hidden_size)
         # Initialize weights with normal distribution
         W1 = np.random.normal(loc=0.1, scale=0.1, size=(hidden_size, n_features))
         W2 = np.random.normal(loc=0.1, scale=0.1, size=(n_classes, hidden_size))
@@ -108,15 +107,11 @@ class MLP(object):
         self.hidden_size = hidden_size
         self.n_classes = n_classes
         self.n_features = n_features
-        
-        print("b1",b1)
-        print("b2",b2)
-        print("W1",W1)
-        print("W2",W2)
+
 
           
         
-    def backward(self, x, y, output, hiddens, zes):
+    def backward(self, x, y, output, hiddens):
         num_layers = len(self.weights)
         g = self.relu
         z = output
@@ -129,7 +124,7 @@ class MLP(object):
         # Backpropagate gradient computations 
         for i in range(num_layers-1, -1, -1):
             # change activation function gradient -> 1rst back : cross entropy, 2nd back, relu
-            print("backward iteration", i)
+            
             # Gradient of hidden parameters.
             h = x if i == 0 else hiddens[i-1]
             grad_weights.append(grad_z[:, None].dot(h[:, None].T))
@@ -139,45 +134,46 @@ class MLP(object):
             grad_h = self.weights[i].T.dot(grad_z)
 
             # Gradient of hidden layer below before activation.
-            if i == 1:
-                grad_z = grad_h * self.reluDerivative(zes[0])
             
-             # Grad of loss wrt z3.
+            grad_z = grad_h * self.reluDerivative(h)
+            
 
         # Making gradient vectors have the correct order
         grad_weights.reverse()
         grad_biases.reverse()
+        
         return grad_weights, grad_biases
         
     def reluDerivative(self, x):
         x[x<=0] = 0
         x[x>0] = 1
         return x
+
+    def softmax(self, x):
+        exp_x = np.exp(x - np.max(x))
+        return exp_x / np.sum(exp_x)
         
     def forward(self, x):
         num_layers = len(self.weights)
         hiddens = []
-        zes = []
-        print("x", x)
+        #print("x", x)
         # compute hidden layers
         for i in range(num_layers):
             h = x if i == 0 else hiddens[i-1]
             z = self.weights[i].dot(h) + self.biases[i]
             if i < num_layers-1:  # Assuming the output layer has no activation.
-                zes.append(z)
                 hiddens.append(self.relu(z))
                 
-        print("bias", self.biases)  
         # apply softmax to z
-        print("z antes", z)
-        z = np.exp(z) / np.sum(np.exp(z))
+        print("z", z)
         
-        print("z depois", z)
+        output = self.softmax(z)
+        
+        print("output", output)
         
         #compute output
-        output = z
         
-        return output, hiddens, zes
+        return output, hiddens
 
     #tomas.costa@tecn...
 
@@ -231,16 +227,21 @@ class MLP(object):
         for x, y in zip(X, y):
             print("iter", iter)
             iter+=1
-            if iter == 1440:
-                exit()
+            '''
+            if iter == 10745:
+                print("x", x)
+                print("y", y)
+                print("weights", self.weights)
+                print("biases", self.biases)
+                exit()'''
             # Compute forward pass
-            output, hiddens, zes = self.forward(x)
+            output, hiddens = self.forward(x)
 
             # Compute Loss and Update total loss
             loss = self.compute_loss(output, y)
             total_loss+=loss
             # Compute backpropagation
-            grad_weights, grad_biases = self.backward(x, y, output, hiddens, zes)
+            grad_weights, grad_biases = self.backward(x, y, output, hiddens)
             
             # Update weights
             
