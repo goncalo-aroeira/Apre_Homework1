@@ -137,12 +137,14 @@ class MLP(object):
             
             grad_z = grad_h * self.reluDerivative(h)
             
-
         # Making gradient vectors have the correct order
         grad_weights.reverse()
         grad_biases.reverse()
         
         return grad_weights, grad_biases
+
+    def relu(self, x):
+        return np.maximum(0, x)
         
     def reluDerivative(self, x):
         x[x<=0] = 0
@@ -161,15 +163,18 @@ class MLP(object):
         for i in range(num_layers):
             h = x if i == 0 else hiddens[i-1]
             z = self.weights[i].dot(h) + self.biases[i]
+            #print("z", z)
+            #print("relu(z)", self.relu(z))
             if i < num_layers-1:  # Assuming the output layer has no activation.
                 hiddens.append(self.relu(z))
                 
+        #print("hiddens", hiddens)
         # apply softmax to z
-        print("z", z)
+        #print("z", z)
         
         output = self.softmax(z)
         
-        print("output", output)
+        #print("output", output)
         
         #compute output
         
@@ -191,10 +196,14 @@ class MLP(object):
 
         # X (n_examples x n_features)
         # return: (n_examples)
-        scores = np.dot(self.weights[0], X.T)  # (n_hidden x n_examples)
-        hidden = np.maximum(scores, 0)
-        scores = np.dot(self.weights[2], hidden)  # (n_classes x n_examples)
-        predicted_labels = scores.argmax(axis=0)
+        predicted_labels = []
+        for x in X:
+            # Compute forward pass and get the class with the highest probability
+            output, _ = self.forward(x)
+            y_hat = np.argmax(output)
+            predicted_labels.append(y_hat)
+        predicted_labels = np.array(predicted_labels)
+        print("predicted_labels", np.unique(predicted_labels))
         return predicted_labels
     
     
@@ -203,15 +212,17 @@ class MLP(object):
         X (n_examples x n_features)
         y (n_examples): gold labels
         """
+        print("evaluate")
+        print("weights", self.weights)
+        print("biases", self.biases)
         # Identical to LinearModel.evaluate()
         y_hat = self.predict(X)
         n_correct = (y == y_hat).sum()
+        print("n_correct", n_correct)
         n_possible = y.shape[0]
+        print("n_possible", n_possible)
         return n_correct / n_possible
     
-
-    def relu(self, x):
-        return np.maximum(0, x)
 
 
     def train_epoch(self, X, y, learning_rate=0.001):
@@ -227,13 +238,13 @@ class MLP(object):
         for x, y in zip(X, y):
             print("iter", iter)
             iter+=1
-            '''
-            if iter == 10745:
+            
+            if iter == 100:
                 print("x", x)
                 print("y", y)
                 print("weights", self.weights)
                 print("biases", self.biases)
-                exit()'''
+                exit()
             # Compute forward pass
             output, hiddens = self.forward(x)
 
@@ -248,6 +259,8 @@ class MLP(object):
             for i in range(num_layers):
                 self.weights[i] -= learning_rate*grad_weights[i]
                 self.biases[i] -= learning_rate*grad_biases[i]
+                
+        print("total_loss", total_loss)
                 
         return total_loss
                 
@@ -327,7 +340,9 @@ def main():
             )
         
         train_accs.append(model.evaluate(train_X, train_y))
+        print("train_accs", train_accs)
         valid_accs.append(model.evaluate(dev_X, dev_y))
+        print("valid_accs", valid_accs)
         if opt.model == 'mlp':
             print('loss: {:.4f} | train acc: {:.4f} | val acc: {:.4f}'.format(
                 loss, train_accs[-1], valid_accs[-1],
