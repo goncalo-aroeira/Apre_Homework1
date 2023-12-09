@@ -165,6 +165,7 @@ class MLP(object):
             z = self.weights[i].dot(h) + self.biases[i]
             #print("z", z)
             #print("relu(z)", self.relu(z))
+            z -= np.max(z)
             if i < num_layers-1:  # Assuming the output layer has no activation.
                 hiddens.append(self.relu(z))
                 
@@ -185,6 +186,9 @@ class MLP(object):
 
     def compute_loss(self, output, y):
         # compute loss
+        epsilon=1e-10
+        output = np.clip(output, epsilon, 1 - epsilon)
+        
         loss = -y * (np.log(output))
                 
         return loss      
@@ -239,12 +243,12 @@ class MLP(object):
             print("iter", iter)
             iter+=1
             
-            if iter == 100:
+            '''if iter == 20000:
                 print("x", x)
                 print("y", y)
                 print("weights", self.weights)
                 print("biases", self.biases)
-                exit()
+                exit()'''
             # Compute forward pass
             output, hiddens = self.forward(x)
 
