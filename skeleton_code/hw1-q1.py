@@ -112,7 +112,6 @@ class MLP(object):
         self.n_features = n_features
 
 
-
     def relu(self, x):
         res = np.array(x, copy=True)
         # replace every entry that is less than 0 with a 0
@@ -134,6 +133,7 @@ class MLP(object):
         """
         return np.argmax(h, axis=0)
 
+
     def predict(self, X):
         # Compute the forward pass of the network. At prediction time, there is
         # no need to save the values of hidden nodes, whereas this is required
@@ -148,6 +148,7 @@ class MLP(object):
 
         return self.output(h)
 
+
     def evaluate(self, X, y):
         """
         X (n_examples x n_features)
@@ -159,63 +160,71 @@ class MLP(object):
         n_possible = y.shape[0]
         return n_correct / n_possible
 
+
     def train_epoch(self, X, y, learning_rate=0.001):
         total_loss = 0
         for (x_i, y_i) in zip(X, y):
-            hidden = []
-            g_primes = []
-
-            # f = o(W_1 h(W_0 X + b_0) + b_1)
-            # Compute internal representation
-            h = x_i.reshape((len(x_i), 1))
-            print("h", h)
-            hidden.append(h)
-
-            for i in range(self.n_layers):
-                print("i", i)
-                # hidden layer i pre-activation
-                z = np.dot(self.W[i], h) + self.b[i]
-
-                # hidden layer i activation
-                h = self.relu(z)
-
-                # save copy of h for backpropagation
-                hidden.append(h)
-                g_primes.append(self.relu_prime(z))
-            print("hidden", hidden)
-            # output layer pre-activation
-            h = np.dot(self.W[-1], h) + self.b[-1]
-
-            # backpropagation (using mean squared error loss)
-            # Compute output gradient
-            grad_z_l = utils.softmax(h)
-
-            epsilon=1e-10
-            output = np.clip(grad_z_l, epsilon, 1 - epsilon)     
-            loss = -y * (np.log(output))
+            # Compute the forward pass of the network. Save the values of hidden
+            
+            grad_z_l, hidden, g_primes = self.forward(x_i)
+   
+            loss = self.compute_loss(grad_z_l, y_i)
             total_loss+=loss
             
             grad_z_l[y_i] -= 1
 
-            for l in range(self.n_layers, -1, -1):
-                print("l", l)
-                # Compute gradients of hidden layer parameters:
-                grad_W_l = np.dot(grad_z_l, hidden[l].T)
-                grad_b_l = grad_z_l
+            self.backward(x_i, y_i, grad_z_l, hidden, g_primes, learning_rate)
 
-                # Compute gradient of previous layer
-                # only update if there is previous layer
-                if l > 0:
-                    grad_h_l = np.dot(self.W[l].T, grad_z_l)
-                    grad_z_l = grad_h_l * g_primes[l-1]
-
-                # Apply gradients to weights and bias
-                self.W[l] -= learning_rate * grad_W_l
-                self.b[l] -= learning_rate * grad_b_l
-            exit()
         return np.mean(loss)  # Compute the mean of the loss values
         
         
+    def forward(self, x):
+        hiddens = []
+        g_primes = []
+        
+        h = x.reshape((len(x), 1))
+        hiddens.append(h)
+        
+        # compute hidden layers
+        for i in range(self.n_layers):
+            z = self.W[i].dot(h) + self.b[i]
+            
+            h = self.relu(z)
+            hiddens.append(h)
+            g_primes.append(self.relu_prime(z))
+   
+        h = np.dot(self.W[-1], h) + self.b[-1]
+        
+        output = utils.softmax(h)   
+        
+        return output, hiddens, g_primes
+    
+    
+    def backward(self, x, y, grad_z_l, hiddens, g_primes, learning_rate):
+        for l in range(self.n_layers, -1, -1):
+            # Compute gradients of hidden layer parameters:
+            grad_W_l = np.dot(grad_z_l, hiddens[l].T)
+            grad_b_l = grad_z_l
+
+            # Compute gradient of previous layer
+            # only update if there is previous layer
+            if l > 0:
+                grad_h_l = np.dot(self.W[l].T, grad_z_l)
+                grad_z_l = grad_h_l * g_primes[l-1]
+
+            # Apply gradients to weights and bias
+            self.W[l] -= learning_rate * grad_W_l
+            self.b[l] -= learning_rate * grad_b_l
+    
+    
+    def compute_loss(self, output, y):
+        # compute loss
+        epsilon=1e-10
+        output = np.clip(output, epsilon, 1 - epsilon)
+        
+        loss = -y * (np.log(output))
+                
+        return loss    
 
 
 def plot(epochs, train_accs, val_accs):
