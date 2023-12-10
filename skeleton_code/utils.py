@@ -75,3 +75,17 @@ class ClassificationDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         return self.X[idx], self.y[idx]
+
+
+def softmax(z):
+    '''
+    z: a (n_classes x n_points) matrix
+    '''
+    # Fix overflow in exp
+    # If we subrtact the same value for every entry in the matrix, we get the same softmax value for each
+    # subtracting the max value to make sure exp(x) will be sufficiently small
+    # https://stats.stackexchange.com/questions/304758/softmax-overflow/304774
+    tmp = z - np.max(z)
+
+    # sum divide by the sum of each column
+    return np.exp(tmp) / np.sum(np.exp(tmp), axis=0)

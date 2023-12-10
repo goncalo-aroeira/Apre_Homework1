@@ -85,7 +85,8 @@ class MLP(object):
     # Q3.2b. This MLP skeleton code allows the MLP to be used in place of the
     # linear models with no changes to the training loop or evaluation code
     # in main().
-    def __init__(self, n_classes, n_features, hidden_size):
+            
+    def __init__(self, n_classes, n_features, hidden_size, n_layers=1):
         # Initialize an MLP with a single hidden layer.
         # n_classes: number of output classes
         # n_features: number of input features
@@ -93,181 +94,128 @@ class MLP(object):
         
         # Initialize weights with normal distribution
         # Initialize weights with normal distribution
+        self.n_layers = n_layers
+        
         W1 = np.random.normal(loc=0.1, scale=0.1, size=(hidden_size, n_features))
         W2 = np.random.normal(loc=0.1, scale=0.1, size=(n_classes, hidden_size))
         
-        self.weights = [W1, W2]
+        self.W = [W1, W2]
 
         # Initialize biases with zero vectors
-        b1 = np.zeros(hidden_size)
-        b2 = np.zeros(n_classes)
+        b1 = np.zeros((hidden_size, 1))
+        b2 = np.zeros((n_classes, 1))
         
-        self.biases = [b1, b2]
+        self.b = [b1, b2]
         
         self.hidden_size = hidden_size
         self.n_classes = n_classes
         self.n_features = n_features
 
 
-          
-        
-    def backward(self, x, y, output, hiddens):
-        num_layers = len(self.weights)
-        g = self.relu
-        z = output
-
-        grad_z = output - y  
-        
-        grad_weights = []
-        grad_biases = []
-        
-        # Backpropagate gradient computations 
-        for i in range(num_layers-1, -1, -1):
-            # change activation function gradient -> 1rst back : cross entropy, 2nd back, relu
-            
-            # Gradient of hidden parameters.
-            h = x if i == 0 else hiddens[i-1]
-            grad_weights.append(grad_z[:, None].dot(h[:, None].T))
-            grad_biases.append(grad_z)
-            
-            # Gradient of hidden layer below.
-            grad_h = self.weights[i].T.dot(grad_z)
-
-            # Gradient of hidden layer below before activation.
-            
-            grad_z = grad_h * self.reluDerivative(h)
-            
-        # Making gradient vectors have the correct order
-        grad_weights.reverse()
-        grad_biases.reverse()
-        
-        return grad_weights, grad_biases
 
     def relu(self, x):
-        return np.maximum(0, x)
-        
-    def reluDerivative(self, x):
-        x[x<=0] = 0
-        x[x>0] = 1
-        return x
+        res = np.array(x, copy=True)
+        # replace every entry that is less than 0 with a 0
+        res[res < 0] = 0
+        return res
 
-    def softmax(self, x):
-        exp_x = np.exp(x - np.max(x))
-        return exp_x / np.sum(exp_x)
-        
-    def forward(self, x):
-        num_layers = len(self.weights)
-        hiddens = []
-        #print("x", x)
-        # compute hidden layers
-        for i in range(num_layers):
-            h = x if i == 0 else hiddens[i-1]
-            z = self.weights[i].dot(h) + self.biases[i]
-            #print("z", z)
-            #print("relu(z)", self.relu(z))
-            z -= np.max(z)
-            if i < num_layers-1:  # Assuming the output layer has no activation.
-                hiddens.append(self.relu(z))
-                
-        #print("hiddens", hiddens)
-        # apply softmax to z
-        #print("z", z)
-        
-        output = self.softmax(z)
-        
-        #print("output", output)
-        
-        #compute output
-        
-        return output, hiddens
+    def relu_prime(self, x):
+        res = np.array(x, copy=True)
+        res[res < 0] = 0
+        res[res > 0] = 1
+        return res
 
-    #tomas.costa@tecn...
+    def output(self, h):
+        """
+        h: a (n_class x n_points) matrix
 
+        returns a vector of size n_points
+        each entry corresponds to the label with highest "score"
+        """
+        return np.argmax(h, axis=0)
 
-    def compute_loss(self, output, y):
-        # compute loss
-        epsilon=1e-10
-        output = np.clip(output, epsilon, 1 - epsilon)
-        
-        loss = -y * (np.log(output))
-                
-        return loss      
-        
     def predict(self, X):
         # Compute the forward pass of the network. At prediction time, there is
         # no need to save the values of hidden nodes, whereas this is required
         # at training time.
+        h = X.T
+        for i in range(self.n_layers):
+            z = np.dot(self.W[i], h) + self.b[i]
 
-        # X (n_examples x n_features)
-        # return: (n_examples)
-        predicted_labels = []
-        for x in X:
-            # Compute forward pass and get the class with the highest probability
-            output, _ = self.forward(x)
-            y_hat = np.argmax(output)
-            predicted_labels.append(y_hat)
-        predicted_labels = np.array(predicted_labels)
-        print("predicted_labels", np.unique(predicted_labels))
-        return predicted_labels
-    
-    
+            h = self.relu(z)
+
+        h = np.dot(self.W[-1], h) + self.b[-1]
+
+        return self.output(h)
+
     def evaluate(self, X, y):
         """
         X (n_examples x n_features)
         y (n_examples): gold labels
         """
-        print("evaluate")
-        print("weights", self.weights)
-        print("biases", self.biases)
         # Identical to LinearModel.evaluate()
         y_hat = self.predict(X)
         n_correct = (y == y_hat).sum()
-        print("n_correct", n_correct)
         n_possible = y.shape[0]
-        print("n_possible", n_possible)
         return n_correct / n_possible
-    
-
 
     def train_epoch(self, X, y, learning_rate=0.001):
-        """
-        Dont forget to return the loss of the epoch.
-        """
-        num_layers = 2
         total_loss = 0
-        print(len(X))
-        print(len(y))
-        iter = 0
-        # For each observation and target
-        for x, y in zip(X, y):
-            print("iter", iter)
-            iter+=1
-            
-            '''if iter == 20000:
-                print("x", x)
-                print("y", y)
-                print("weights", self.weights)
-                print("biases", self.biases)
-                exit()'''
-            # Compute forward pass
-            output, hiddens = self.forward(x)
+        for (x_i, y_i) in zip(X, y):
+            hidden = []
+            g_primes = []
 
-            # Compute Loss and Update total loss
-            loss = self.compute_loss(output, y)
+            # f = o(W_1 h(W_0 X + b_0) + b_1)
+            # Compute internal representation
+            h = x_i.reshape((len(x_i), 1))
+            print("h", h)
+            hidden.append(h)
+
+            for i in range(self.n_layers):
+                print("i", i)
+                # hidden layer i pre-activation
+                z = np.dot(self.W[i], h) + self.b[i]
+
+                # hidden layer i activation
+                h = self.relu(z)
+
+                # save copy of h for backpropagation
+                hidden.append(h)
+                g_primes.append(self.relu_prime(z))
+            print("hidden", hidden)
+            # output layer pre-activation
+            h = np.dot(self.W[-1], h) + self.b[-1]
+
+            # backpropagation (using mean squared error loss)
+            # Compute output gradient
+            grad_z_l = utils.softmax(h)
+
+            epsilon=1e-10
+            output = np.clip(grad_z_l, epsilon, 1 - epsilon)     
+            loss = -y * (np.log(output))
             total_loss+=loss
-            # Compute backpropagation
-            grad_weights, grad_biases = self.backward(x, y, output, hiddens)
             
-            # Update weights
-            
-            for i in range(num_layers):
-                self.weights[i] -= learning_rate*grad_weights[i]
-                self.biases[i] -= learning_rate*grad_biases[i]
-                
-        print("total_loss", total_loss)
-                
-        return total_loss
-                
+            grad_z_l[y_i] -= 1
+
+            for l in range(self.n_layers, -1, -1):
+                print("l", l)
+                # Compute gradients of hidden layer parameters:
+                grad_W_l = np.dot(grad_z_l, hidden[l].T)
+                grad_b_l = grad_z_l
+
+                # Compute gradient of previous layer
+                # only update if there is previous layer
+                if l > 0:
+                    grad_h_l = np.dot(self.W[l].T, grad_z_l)
+                    grad_z_l = grad_h_l * g_primes[l-1]
+
+                # Apply gradients to weights and bias
+                self.W[l] -= learning_rate * grad_W_l
+                self.b[l] -= learning_rate * grad_b_l
+            exit()
+        return np.mean(loss)  # Compute the mean of the loss values
+        
+        
 
 
 def plot(epochs, train_accs, val_accs):
@@ -342,7 +290,7 @@ def main():
                 train_y,
                 learning_rate=opt.learning_rate
             )
-        
+        print ("loss", loss)
         train_accs.append(model.evaluate(train_X, train_y))
         print("train_accs", train_accs)
         valid_accs.append(model.evaluate(dev_X, dev_y))
