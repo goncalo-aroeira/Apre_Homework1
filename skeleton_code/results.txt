@@ -1,0 +1,62 @@
+(IST_DL21_Env) goncalo_aroeira > time python hw1-q2.py mlp 
+Final Test acc: 0.7599
+
+real    1m32.873s
+user    5m51.031s
+sys     0m2.801s
+
+
+(IST_DL21_Env) goncalo_aroeira > time python hw1-q2.py mlp -batch_size 1024
+Final Test acc: 0.7278
+
+real    0m30.169s
+user    1m39.130s
+sys     0m2.068s
+
+
+(IST_DL21_Env) goncalo_aroeira > time python hw1-q2.py mlp -learning_rate 0.01
+Final Test acc: 0.7637
+
+real    1m32.213s
+user    5m52.197s
+sys     0m2.780s
+
+
+(IST_DL21_Env) goncalo_aroeira > time python hw1-q2.py mlp -learning_rate 0.001
+Final Test acc: 0.7051
+
+real    1m32.977s
+user    5m53.081s
+sys     0m2.730s
+
+
+(IST_DL21_Env) goncalo_aroeira > time python hw1-q2.py mlp -learning_rate 1
+Final Test acc: 0.3440
+
+real    1m54.607s
+user    7m20.868s
+sys     0m2.931s
+
+
+(IST_DL21_Env) goncalo_aroeira > time python hw1-q2.py mlp -epochs 150 -batch_size 256
+Final Test acc: 0.7543
+
+real    3m45.714s
+user    14m35.167s
+sys     0m4.104s
+
+
+(IST_DL21_Env) goncalo_aroeira > time python hw1-q2.py mlp -epochs 150 -batch_size 256 -l2_decay 0.0001
+Final Test acc: 0.7694
+
+real    3m23.032s
+user    13m5.403s
+sys     0m3.860s
+
+
+(IST_DL21_Env) goncalo_aroeira > time python hw1-q2.py mlp -epochs 150 -batch_size 256 -dropout 0.2
+Final Test acc: 0.7977
+
+real    3m36.504s
+user    13m58.152s
+sys     0m3.580s
