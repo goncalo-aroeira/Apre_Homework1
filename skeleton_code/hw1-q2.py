@@ -70,9 +70,32 @@ class FeedforwardNetwork(nn.Module):
         includes modules for several activation functions and dropout as well.
         """
         super().__init__()
-        # Implement me!
-        raise NotImplementedError
 
+        self.layers = []
+        self.params = nn.ParameterList([])
+
+        # input to first hidden layer
+        self.layers.append(nn.Linear(n_features, hidden_size, bias=True))
+
+        # hidden to hidden
+        for i in range(layers-1):
+            self.layers.append(nn.Linear(hidden_size, hidden_size, bias=True))
+
+        # hidden to output
+        self.layers.append(nn.Linear(hidden_size, n_classes, bias=True))
+
+        # make parameters visible to pytorch
+        for layer in self.layers:
+            self.params.extend(layer.parameters())
+            
+        if activation_type == "tanh":
+            self.activation = nn.Tanh()
+        else:
+            self.activation = nn.ReLU()
+
+        self.dropout = nn.Dropout(dropout)           
+            
+            
     def forward(self, x, **kwargs):
         """
         x (batch_size x n_features): a batch of training examples
@@ -81,8 +104,12 @@ class FeedforwardNetwork(nn.Module):
         the output logits from x. This will include using various hidden
         layers, pointwise nonlinear functions, and dropout.
         """
-        raise NotImplementedError
-
+        for layer in self.layers:
+            x = layer(x)
+            x = self.dropout(x)
+            x = self.activation(x)
+        return x
+    
 
 def train_batch(X, y, model, optimizer, criterion, **kwargs):
     """
@@ -170,13 +197,13 @@ def main():
     parser.add_argument('-epochs', default=20, type=int,
                         help="""Number of epochs to train for. You should not
                         need to change this value for your plots.""")
-    parser.add_argument('-batch_size', default=1, type=int,
+    parser.add_argument('-batch_size', default=16, type=int,
                         help="Size of training batch.")
-    parser.add_argument('-learning_rate', type=float, default=0.01)
+    parser.add_argument('-learning_rate', type=float, default=0.1)
     parser.add_argument('-l2_decay', type=float, default=0)
-    parser.add_argument('-hidden_size', type=int, default=100)
-    parser.add_argument('-layers', type=int, default=1)
-    parser.add_argument('-dropout', type=float, default=0.3)
+    parser.add_argument('-hidden_size', type=int, default=200)
+    parser.add_argument('-layers', type=int, default=2)
+    parser.add_argument('-dropout', type=float, default=0.0)
     parser.add_argument('-activation',
                         choices=['tanh', 'relu'], default='relu')
     parser.add_argument('-optimizer',
