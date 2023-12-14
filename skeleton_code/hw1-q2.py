@@ -26,7 +26,7 @@ class LogisticRegression(nn.Module):
         pytorch to make weights and biases, have a look at
         https://pytorch.org/docs/stable/nn.html
         """
-        super(LogisticRegression, self).__init__()
+        super().__init__()
         self.linear = nn.Linear(n_features, n_classes)
 
         
@@ -71,8 +71,7 @@ class FeedforwardNetwork(nn.Module):
         """
         super().__init__()
 
-        self.layers = []
-        self.params = nn.ParameterList([])
+        self.layers = nn.ModuleList([])
 
         # input to first hidden layer
         self.layers.append(nn.Linear(n_features, hidden_size, bias=True))
@@ -83,10 +82,6 @@ class FeedforwardNetwork(nn.Module):
 
         # hidden to output
         self.layers.append(nn.Linear(hidden_size, n_classes, bias=True))
-
-        # make parameters visible to pytorch
-        for layer in self.layers:
-            self.params.extend(layer.parameters())
             
         if activation_type == "tanh":
             self.activation = nn.Tanh()
@@ -104,10 +99,14 @@ class FeedforwardNetwork(nn.Module):
         the output logits from x. This will include using various hidden
         layers, pointwise nonlinear functions, and dropout.
         """
-        for layer in self.layers:
+        for i in range (len(self.layers) - 1):
+            layer = self.layers[i]
             x = layer(x)
-            x = self.dropout(x)
             x = self.activation(x)
+            x = self.dropout(x)
+            
+        x = self.layers[-1](x)
+        
         return x
     
 
@@ -129,18 +128,13 @@ def train_batch(X, y, model, optimizer, criterion, **kwargs):
     This function should return the loss (tip: call loss.item()) to get the
     loss as a numerical value that is not part of the computation graph.
     """
-    # Set the model to training mode
-    model.train()
 
-    # Convert data to PyTorch tensors
-    X_tensor = torch.Tensor(X)
-    y_tensor = torch.LongTensor(y)
 
     # Forward pass
-    outputs = model(X_tensor)
+    outputs = model(X)
 
     # Compute the loss
-    loss = criterion(outputs, y_tensor)
+    loss = criterion(outputs, y)
 
     # Backward pass and optimization
     optimizer.zero_grad()
@@ -186,6 +180,7 @@ def plot(epochs, plottables, name='', ylim=None):
     plt.legend()
     if ylim:
         plt.ylim(ylim)
+    plt.yscale('linear')  # Defina a escala do eixo y
     plt.savefig('images/%s.pdf' % (name), bbox_inches='tight')
 
 
@@ -294,7 +289,7 @@ def main():
     if opt.model == "logistic_regression":
         ylim = (0., 1.6)
     elif opt.model == "mlp":
-        ylim = (0., 1.2)
+        ylim = (0., 1.5)
     else:
         raise ValueError(f"Unknown model {opt.model}")
     plot(epochs, losses, name=f'{opt.model}-training-loss-{config}', ylim=ylim)

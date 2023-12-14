@@ -168,14 +168,14 @@ class MLP(object):
             
             grad_z_l, hidden, g_primes = self.forward(x_i)
    
-            loss = self.compute_loss(grad_z_l, y_i)
-            total_loss+=loss
+            loss = self.compute_loss(grad_z_l, y_i, X)
+            total_loss-=loss
             
             grad_z_l[y_i] -= 1
 
             self.backward(x_i, y_i, grad_z_l, hidden, g_primes, learning_rate)
-
-        return np.mean(loss)  # Compute the mean of the loss values
+        print("len X", len(X))
+        return total_loss  # Compute the mean of the loss values
         
         
     def forward(self, x):
@@ -195,7 +195,8 @@ class MLP(object):
    
         h = np.dot(self.W[-1], h) + self.b[-1]
         
-        output = utils.softmax(h)   
+        output = utils.softmax(h)  
+        print("output", output) 
         
         return output, hiddens, g_primes
     
@@ -217,12 +218,12 @@ class MLP(object):
             self.b[l] -= learning_rate * grad_b_l
     
     
-    def compute_loss(self, output, y):
+    def compute_loss(self, output, y, X):
         # compute loss
         epsilon=1e-10
         output = np.clip(output, epsilon, 1 - epsilon)
         
-        loss = -y * (np.log(output))
+        loss = sum(-y * (np.log(output))) / len(X)
                 
         return loss    
 
@@ -234,7 +235,7 @@ def plot(epochs, train_accs, val_accs):
     plt.plot(epochs, val_accs, label='validation')
     plt.legend()
     plt.show()
-    plt.savefig('images/q1_2b.png')
+    plt.savefig('images/q1_2b_accs.png')
 
 def plot_loss(epochs, loss):
     plt.xlabel('Epoch')
@@ -242,6 +243,7 @@ def plot_loss(epochs, loss):
     plt.plot(epochs, loss, label='train')
     plt.legend()
     plt.show()
+    plt.savefig('images/q1_2b_loss.png')
 
 
 def main():
@@ -306,7 +308,7 @@ def main():
         print("valid_accs", valid_accs)
         if opt.model == 'mlp':
             print('loss: {:.4f} | train acc: {:.4f} | val acc: {:.4f}'.format(
-                loss, train_accs[-1], valid_accs[-1],
+                loss[-1], train_accs[-1], valid_accs[-1],
             ))
             train_loss.append(loss)
         else:
