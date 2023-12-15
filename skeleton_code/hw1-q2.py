@@ -77,7 +77,7 @@ class FeedforwardNetwork(nn.Module):
         self.layers.append(nn.Linear(n_features, hidden_size, bias=True))
 
         # hidden to hidden
-        for i in range(layers-1):
+        for i in range(layers):
             self.layers.append(nn.Linear(hidden_size, hidden_size, bias=True))
 
         # hidden to output
@@ -99,11 +99,12 @@ class FeedforwardNetwork(nn.Module):
         the output logits from x. This will include using various hidden
         layers, pointwise nonlinear functions, and dropout.
         """
-        for i in range (len(self.layers) - 1):
-            layer = self.layers[i]
+        x = self.activation(self.layers[0](x))
+        
+        for layer in self.layers[1:len(self.layers)-1]:
             x = layer(x)
-            x = self.activation(x)
             x = self.dropout(x)
+            x = self.activation(x)
             
         x = self.layers[-1](x)
         

@@ -196,7 +196,6 @@ class MLP(object):
         h = np.dot(self.W[-1], h) + self.b[-1]
         
         output = utils.softmax(h)  
-        print("output", output) 
         
         return output, hiddens, g_primes
     

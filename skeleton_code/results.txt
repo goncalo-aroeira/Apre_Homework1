@@ -25,32 +25,32 @@ Valid acc: 0.6163
 Final Test acc: 0.6503
 
 
-(IST_DL21_Env) goncalo_aroeira > python hw1-q2.py logistic_regression
+(IST_DL21_Env) goncalo_aroeira > python hw1-q2.py logistic_regression 
 Valid acc: 0.6224
 Final Test acc: 0.5577
 
 
 (IST_DL21_Env) goncalo_aroeira > time python hw1-q2.py mlp 
-Valid acc: 0.8241
-Final Test acc: 0.7561
+Valid acc: 0.8261
+Final Test acc: 0.7543
 
-real    1m32.873s
-user    5m51.031s
-sys     0m2.801s
+real    1m41.954s
+user    6m23.134s
+sys     0m3.742s
 
 
 (IST_DL21_Env) goncalo_aroeira > time python hw1-q2.py mlp -batch_size 1024
-Valid acc: 0.6957
-Final Test acc: 0.7316
+Valid acc: 0.6817
+Final Test acc: 0.7127
 
-real    0m30.169s
-user    1m39.130s
-sys     0m2.068s
+real    0m54.143s
+user    3m13.763s
+sys     0m2.305s
 
 
 (IST_DL21_Env) goncalo_aroeira > time python hw1-q2.py mlp -learning_rate 0.01
-Valid acc: 0.8165
-Final Test acc: 0.7599
+Valid acc: 0.8251
+Final Test acc: 0.7580
 
 real    1m32.213s
 user    5m52.197s
@@ -58,8 +58,8 @@ sys     0m2.780s
 
 
 (IST_DL21_Env) goncalo_aroeira > time python hw1-q2.py mlp -learning_rate 0.001
-Valid acc: 0.6920
-Final Test acc: 0.7127
+Valid acc: 0.7230
+Final Test acc: 0.7335
 
 real    1m32.977s
 user    5m53.081s
@@ -67,7 +67,6 @@ sys     0m2.730s
 
 
 (IST_DL21_Env) goncalo_aroeira > time python hw1-q2.py mlp -learning_rate 1
-Training loss: 1.1714
 Valid acc: 0.4721
 Final Test acc: 0.4726
 
@@ -77,8 +76,8 @@ sys     0m2.931s
 
 
 (IST_DL21_Env) goncalo_aroeira > time python hw1-q2.py mlp -epochs 150 -batch_size 256
-Valid acc: 0.8493
-Final Test acc: 0.7656
+Valid acc: 0.8615
+Final Test acc: 0.7637
 
 real    3m45.714s
 user    14m35.167s
@@ -86,8 +85,8 @@ sys     0m4.104s
 
 
 (IST_DL21_Env) goncalo_aroeira > time python hw1-q2.py mlp -epochs 150 -batch_size 256 -l2_decay 0.0001
-Valid acc: 0.8512
-Final Test acc: 0.7694
+Valid acc: 0.8606
+Final Test acc: 0.7637
 
 real    3m23.032s
 user    13m5.403s
@@ -95,8 +94,8 @@ sys     0m3.860s
 
 
 (IST_DL21_Env) goncalo_aroeira > time python hw1-q2.py mlp -epochs 150 -batch_size 256 -dropout 0.2
-Valid acc: 0.8561
-Final Test acc: 0.7864
+Valid acc: 0.8653
+Final Test acc: 0.7732
 
 real    3m36.504s
 user    13m58.152s
