@@ -169,13 +169,13 @@ class MLP(object):
             grad_z_l, hidden, g_primes = self.forward(x_i)
    
             loss = self.compute_loss(grad_z_l, y_i, X)
-            total_loss-=loss
+            total_loss+=loss
             
             grad_z_l[y_i] -= 1
 
             self.backward(x_i, y_i, grad_z_l, hidden, g_primes, learning_rate)
         print("len X", len(X))
-        return total_loss  # Compute the mean of the loss values
+        return [total_loss]  # Compute the mean of the loss values
         
         
     def forward(self, x):
@@ -219,10 +219,7 @@ class MLP(object):
     
     def compute_loss(self, output, y, X):
         # compute loss
-        epsilon=1e-10
-        output = np.clip(output, epsilon, 1 - epsilon)
-        
-        loss = sum(-y * (np.log(output))) / len(X)
+        loss = -np.sum(y * np.log(output + 1e-10)) / len(X)
                 
         return loss    
 
