@@ -22,40 +22,79 @@ class CNN(nn.Module):
         self.no_maxpool = no_maxpool
         if not no_maxpool:
             # Implementation for Q2.1
-            raise NotImplementedError
+            
+            # TODO padding not defined correctly
+            self.conv1 = nn.Conv2d(in_channels=1, out_channels=8, kernel_size=3, stride=1, padding=1)
+            self.relu1 = nn.ReLU()
+            self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
+            
+            self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=3, stride=1, padding=0)
+            self.relu2 = nn.ReLU()
+            self.maxpool2 = nn.MaxPool2d(kernel_size=2, stride=2)
+            
+            #An affine transformation with 320 output features (to determine the number of input features use the number of channels, width and height of the output of the second block. Hint: The number of input features = number of output channels × output width × output height).
+            self.fc1 = nn.Linear(16*6*6, 320)
+            self.relu3 = nn.ReLU()
+            self.drop = nn.Dropout(p=dropout_prob)
+            
+            # An affine transformation with 120 output features.
+            self.fc2 = nn.Linear(320, 120)
+            self.relu4 = nn.ReLU()
+            
+            # An affine transformation with the number of classes followed by an output LogSoftmax layer
+            self.fc3 = nn.Linear(120, 4)
+            self.log_softmax = nn.LogSoftmax(dim=1)
+            
         else:
             # Implementation for Q2.2
             raise NotImplementedError
         
-        # Implementation for Q2.1 and Q2.2
-        raise NotImplementedError
+
         
     def forward(self, x):
         # input should be of shape [b, c, w, h]
         # conv and relu layers
-
+    
         # max-pool layer if using it
         if not self.no_maxpool:
-            raise NotImplementedError
+            # Batch size = 8, images 28x28 =>
+            #     x.shape = [8, 1, 28, 28]
+                    
+            x = torch.reshape(x, (x.shape[0], 1, 28, 28))
+            
+            # First Convolutional Block
+            x = self.conv1(x)
+            # x.shape = [8, 8, 28, 28]
+            x = self.relu1(x)
+            x = self.maxpool1(x)
+            # x.shape = [8, 8, 14, 14]
+            
+            # Second Convolutional Block
+            x = self.conv2(x)
+            # x.shape = [8, 16, 12, 12]
+            x = self.relu2(x)
+            x = self.maxpool2(x)
+            # x.shape = [8, 16, 6, 6]
         
         # conv and relu layers
         
-
-        # max-pool layer if using it
-        if not self.no_maxpool:
-            raise NotImplementedError
-        
         # prep for fully connected layer + relu
         
-        # drop out
-        x = self.drop(x)
+        # Flatten the output for fully connected layers
+        x = x.view(x.shape[0], 16*6*6)
 
-        # second fully connected layer + relu
+        # Fully Connected Layers
+        x = self.fc1(x)
+        x = self.relu3(x)
+        x = self.drop(x)
         
-        # last fully connected layer
+        x = self.fc2(x)
+        x = self.relu4(x)
+        
         x = self.fc3(x)
+        x = self.log_softmax(x)
         
-        return F.log_softmax(x,dim=1)
+        return x
 
 def train_batch(X, y, model, optimizer, criterion, **kwargs):
     """
