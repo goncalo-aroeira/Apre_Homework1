@@ -172,8 +172,12 @@ def plot(epochs, plottable, ylabel='', name=''):
 
 
 def get_number_trainable_params(model):
-    ## TO IMPLEMENT - REPLACE return 0
-    return 0
+    
+    #model_parameters_cnn = filter(lambda p: p.requires_grad, model.parameters())
+    #params_cnn = sum([np.prod(p.size()) for p in model_parameters_cnn])
+    #print('Number of parameters in the CNN model: {}'.format(params_cnn))
+    
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
 def main():

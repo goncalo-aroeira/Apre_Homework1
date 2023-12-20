@@ -1,5 +1,6 @@
 ######################################################################
 ######################### WITH MAXPOOL ###############################
+######################################################################
 Training epoch 1
 Training loss: 0.8708
 Valid acc: 0.7464
@@ -46,7 +47,7 @@ Training epoch 15
 Training loss: 0.6147
 Valid acc: 0.8251
 Final Test acc: 0.8015
-Number of trainable parameters:  0
+Number of trainable parameters:  224892
 FINISHED FOR LEARNING RATE 0.1
 /home/goncalo_aroeira/anaconda3/envs/IST_DL21_Env/lib/python3.8/site-packages/torchvision/io/image.py:13: UserWarning: Failed to load image Python extension: '/home/goncalo_aroeira/anaconda3/envs/IST_DL21_Env/lib/python3.8/site-packages/torchvision/image.so: undefined symbol: _ZN5torch3jit17parseSchemaOrNameERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE'If you don't plan on using image functionality from `torchvision.io`, you can ignore this warning. Otherwise, there might be something wrong with your environment. Did you have `libjpeg` or `libpng` installed before building `torchvision` from source?
   warn(
@@ -96,7 +97,7 @@ Training epoch 15
 Training loss: 0.5380
 Valid acc: 0.8698
 Final Test acc: 0.8242
-Number of trainable parameters:  0
+Number of trainable parameters:  224892
 FINISHED MLP FOR LEARNING RATE 0.01
 /home/goncalo_aroeira/anaconda3/envs/IST_DL21_Env/lib/python3.8/site-packages/torchvision/io/image.py:13: UserWarning: Failed to load image Python extension: '/home/goncalo_aroeira/anaconda3/envs/IST_DL21_Env/lib/python3.8/site-packages/torchvision/image.so: undefined symbol: _ZN5torch3jit17parseSchemaOrNameERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE'If you don't plan on using image functionality from `torchvision.io`, you can ignore this warning. Otherwise, there might be something wrong with your environment. Did you have `libjpeg` or `libpng` installed before building `torchvision` from source?
   warn(
@@ -146,8 +147,10 @@ Training epoch 15
 Training loss: 0.9563
 Valid acc: 0.7660
 Final Test acc: 0.7486
-Number of trainable parameters:  0
+Number of trainable parameters:  224892
 FINISHED MLP FOR LEARNING RATE 0.001
+
+
 
 
 ######################################################################
@@ -199,7 +202,7 @@ Training epoch 15
 Training loss: 0.6932
 Valid acc: 0.7705
 Final Test acc: 0.7675
-Number of trainable parameters:  0
+Number of trainable parameters:  224892
 FINISHED FOR LEARNING RATE 0.1
 /home/goncalo_aroeira/anaconda3/envs/IST_DL21_Env/lib/python3.8/site-packages/torchvision/io/image.py:13: UserWarning: Failed to load image Python extension: '/home/goncalo_aroeira/anaconda3/envs/IST_DL21_Env/lib/python3.8/site-packages/torchvision/image.so: undefined symbol: _ZN5torch3jit17parseSchemaOrNameERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE'If you don't plan on using image functionality from `torchvision.io`, you can ignore this warning. Otherwise, there might be something wrong with your environment. Did you have `libjpeg` or `libpng` installed before building `torchvision` from source?
   warn(
@@ -249,7 +252,7 @@ Training epoch 15
 Training loss: 0.6434
 Valid acc: 0.8517
 Final Test acc: 0.7921
-Number of trainable parameters:  0
+Number of trainable parameters:  224892
 FINISHED MLP FOR LEARNING RATE 0.01
 /home/goncalo_aroeira/anaconda3/envs/IST_DL21_Env/lib/python3.8/site-packages/torchvision/io/image.py:13: UserWarning: Failed to load image Python extension: '/home/goncalo_aroeira/anaconda3/envs/IST_DL21_Env/lib/python3.8/site-packages/torchvision/image.so: undefined symbol: _ZN5torch3jit17parseSchemaOrNameERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE'If you don't plan on using image functionality from `torchvision.io`, you can ignore this warning. Otherwise, there might be something wrong with your environment. Did you have `libjpeg` or `libpng` installed before building `torchvision` from source?
   warn(
@@ -299,5 +302,5 @@ Training epoch 15
 Training loss: 1.0512
 Valid acc: 0.6910
 Final Test acc: 0.7051
-Number of trainable parameters:  0
+Number of trainable parameters:  224892
 FINISHED MLP FOR LEARNING RATE 0.001
