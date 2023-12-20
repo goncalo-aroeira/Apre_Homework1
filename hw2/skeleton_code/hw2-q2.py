@@ -47,8 +47,24 @@ class CNN(nn.Module):
             
         else:
             # Implementation for Q2.2
-            raise NotImplementedError
-        
+            self.conv1 = nn.Conv2d(in_channels=1, out_channels=8, kernel_size=3, stride=2, padding=1)
+            self.relu1 = nn.ReLU()
+            
+            self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=3, stride=2, padding=0)
+            self.relu2 = nn.ReLU()
+            
+            #An affine transformation with 320 output features (to determine the number of input features use the number of channels, width and height of the output of the second block. Hint: The number of input features = number of output channels × output width × output height).
+            self.fc1 = nn.Linear(16*6*6, 320)
+            self.relu3 = nn.ReLU()
+            self.drop = nn.Dropout(p=dropout_prob)
+            
+            # An affine transformation with 120 output features.
+            self.fc2 = nn.Linear(320, 120)
+            self.relu4 = nn.ReLU()
+            
+            # An affine transformation with the number of classes followed by an output LogSoftmax layer
+            self.fc3 = nn.Linear(120, 4)
+            self.log_softmax = nn.LogSoftmax(dim=1)                 
 
         
     def forward(self, x):
@@ -76,10 +92,25 @@ class CNN(nn.Module):
             x = self.maxpool2(x)
             # x.shape = [8, 16, 6, 6]
         
+        else:
+            # Batch size = 8, images 28x28 =>
+            #     x.shape = [8, 1, 28, 28]
+                    
+            x = torch.reshape(x, (x.shape[0], 1, 28, 28))
+            
+            # First Convolutional Block
+            x = self.conv1(x)
+            # x.shape = [8, 8, 28, 28]
+            x = self.relu1(x)
+            
+            # Second Convolutional Block
+            x = self.conv2(x)
+            # x.shape = [8, 16, 12, 12]
+            x = self.relu2(x)
+
         # conv and relu layers
         
         # prep for fully connected layer + relu
-        
         # Flatten the output for fully connected layers
         x = x.view(x.shape[0], 16*6*6)
 
