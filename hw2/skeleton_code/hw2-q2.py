@@ -23,7 +23,6 @@ class CNN(nn.Module):
         if not no_maxpool:
             # Implementation for Q2.1
             
-            # TODO padding not defined correctly
             self.conv1 = nn.Conv2d(in_channels=1, out_channels=8, kernel_size=3, stride=1, padding=1)
             self.relu1 = nn.ReLU()
             self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=2)
@@ -32,16 +31,13 @@ class CNN(nn.Module):
             self.relu2 = nn.ReLU()
             self.maxpool2 = nn.MaxPool2d(kernel_size=2, stride=2)
             
-            #An affine transformation with 320 output features (to determine the number of input features use the number of channels, width and height of the output of the second block. Hint: The number of input features = number of output channels × output width × output height).
             self.fc1 = nn.Linear(16*6*6, 320)
             self.relu3 = nn.ReLU()
             self.drop = nn.Dropout(p=dropout_prob)
             
-            # An affine transformation with 120 output features.
             self.fc2 = nn.Linear(320, 120)
             self.relu4 = nn.ReLU()
             
-            # An affine transformation with the number of classes followed by an output LogSoftmax layer
             self.fc3 = nn.Linear(120, 4)
             self.log_softmax = nn.LogSoftmax(dim=1)
             
@@ -53,16 +49,13 @@ class CNN(nn.Module):
             self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=3, stride=2, padding=0)
             self.relu2 = nn.ReLU()
             
-            #An affine transformation with 320 output features (to determine the number of input features use the number of channels, width and height of the output of the second block. Hint: The number of input features = number of output channels × output width × output height).
             self.fc1 = nn.Linear(16*6*6, 320)
             self.relu3 = nn.ReLU()
             self.drop = nn.Dropout(p=dropout_prob)
             
-            # An affine transformation with 120 output features.
             self.fc2 = nn.Linear(320, 120)
             self.relu4 = nn.ReLU()
             
-            # An affine transformation with the number of classes followed by an output LogSoftmax layer
             self.fc3 = nn.Linear(120, 4)
             self.log_softmax = nn.LogSoftmax(dim=1)                 
 
@@ -172,10 +165,6 @@ def plot(epochs, plottable, ylabel='', name=''):
 
 
 def get_number_trainable_params(model):
-    
-    #model_parameters_cnn = filter(lambda p: p.requires_grad, model.parameters())
-    #params_cnn = sum([np.prod(p.size()) for p in model_parameters_cnn])
-    #print('Number of parameters in the CNN model: {}'.format(params_cnn))
     
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
